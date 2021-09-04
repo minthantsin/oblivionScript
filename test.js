@@ -23,9 +23,17 @@ const handlers = {
         const name = args.shift();
         args = args.join(" ");
         args = args === "last" ? context.lastValue : cleanUp(args, "'");
-        return `let ${name} = ${type !== "int" ? "'" : "+"}${args}${type !== "int" ? "'" : ""}`;
+        return `let ${name} = ${type !== "int" ? "'" : "+"}${args}${type !== "int" ? "'" : ""};`;
     },
-    function: function(context, args) {}
+    function: function(context, args) {
+        const name = args.shift();
+        args = args.join(" ");
+        let arguments = inBetween(args, "(", ")");
+        args = args.replace(`(${arguments})`, "").split(" ");
+        let output = `function ${name}(`;
+        arguments = arguments.split(", ");
+        
+    }
 };
 
 function getJSFromLine(context, line) {
@@ -34,3 +42,12 @@ function getJSFromLine(context, line) {
     if (handlers[action]) return handlers[action](context, args);
     return handlers.default(context, args);
 }
+
+function compile(code) {
+    let compiled = "";
+    code = code.split("\n");
+    code.forEach(line => compiled += getJSFromLine(null, line));
+    console.log(compiled)
+    return eval(compiled);
+}
+require("fs").promises.readFile("main.ob").then(buff => console.log(compile(buff.toString())));
